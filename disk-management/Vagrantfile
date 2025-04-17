@@ -1,0 +1,26 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "hashicorp/bionic64"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = "vagrant-with-extra-disk"
+
+    # Path for the extra disk
+    disk_path = File.expand_path("extra_disk.vdi", __dir__)
+
+    # Only create the disk if it doesn't already exist
+    unless File.exist?(disk_path)
+      vb.customize ['createhd', '--filename', disk_path, '--size', 10240] # size in MB (10GB)
+    end
+
+    # Attach the disk to the VM
+    vb.customize [
+      'storageattach', :id,
+      '--storagectl', 'SATA Controller',
+      '--port', 1,
+      '--device', 0,
+      '--type', 'hdd',
+      '--medium', disk_path
+    ]
+  end
+end
+
